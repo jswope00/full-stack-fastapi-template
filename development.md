@@ -79,6 +79,22 @@ cd backend
 fastapi dev app/main.py
 ```
 
+## Running Several Copies of This Stack at Once
+
+All the host-side ports (Traefik, Postgres, Adminer, backend, frontend, Mailcatcher, Playwright report server) are configurable via `.env` instead of being hardcoded in the compose files, with defaults that match the values described above.
+
+To run a second (or third...) copy of this template locally at the same time, without port conflicts:
+
+1. Copy/clone the template into a new directory.
+2. In that copy's `.env`, set unique values for:
+   - `COMPOSE_PROJECT_NAME` and `STACK_NAME` (so container/volume/network names don't collide)
+   - `TRAEFIK_HTTP_PORT`, `TRAEFIK_DASHBOARD_PORT`, `POSTGRES_HOST_PORT`, `ADMINER_HOST_PORT`, `BACKEND_HOST_PORT`, `FRONTEND_HOST_PORT`, `MAILCATCHER_UI_PORT`, `MAILCATCHER_SMTP_PORT`, `PLAYWRIGHT_HOST_PORT`
+3. Run `docker compose watch` as usual in each copy's directory.
+
+`FRONTEND_HOST` and `BACKEND_CORS_ORIGINS` reference `${FRONTEND_HOST_PORT}`, so they stay in sync automatically - you don't need to update them by hand.
+
+Note: `POSTGRES_PORT` is the port Postgres listens on *inside* its container (used for backend-to-db traffic on the internal Docker network) and should stay `5432`. Only `POSTGRES_HOST_PORT` needs to change to avoid host port conflicts.
+
 ## Docker Compose in `localhost.tiangolo.com`
 
 When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).
